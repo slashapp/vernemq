@@ -1,5 +1,23 @@
 # Changelog
 
+## VerneMQ 1.7.1
+
+- Cleanup cluster state information on a node which is being gracefully removed
+  from the cluster so if it is restarted it comes back up as a stand-alone node
+  and won't try to reconnect to the remaining nodes.
+- Upgraded dependency `swc`. Improves memory and cpu usage by fixing node clock
+  update bug.
+- Set queue expiration (`persistent_client_expiration`) timer on queues after a
+  broker restart (#1071).
+- Fix status page to show all cluster nodes (#1066).
+- Fix Lua `json.decode()` when decoding empty Json objects (#1080).
+- Fix `vmq_diversity` cache invalidation timing issue when a client reconnects
+  right after a disconnect (#996).
+- Fix retry of MQTT publish frame in `vmq_bridge` (#1084).
+- Fix outgoing qos2 message id bug (#1045).
+
+## VerneMQ 1.7.0
+
 - Fix `vmq_webhooks` issue where MQTTv5 hooks where not configurable in the
   `vernemq.conf` file.
 - Support shared subscriptions in `vmq_bridge`.
@@ -73,6 +91,35 @@
 - Fix `vmq_diversity` PostgreSQL reconnect issue (#1008).
 - Fix `vmq_webhooks` so peer port is not considered when caching the
   `auth_on_register` to avoid cache misses.
+- Multiple bug fixes and improvements in `vmq_swc`.
+- Add the `vmq_swc` metadata plugin (using the already existing LevelDB backend) to
+  the default VerneMQ release. To use `vmq_swc` instead of `vmq_plumtree` set
+  `metadata_plugin = vmq_swc` in `vernemq.conf`. `vmq_swc` is still in Beta.
+- Add missing increments of the `mqtt_connack_sent` metric for CONNACK
+  success(0) for MQTT 3.1.1.
+- Handle edge case with unknown task completion messages in `vmq_reg_sync` after
+  a restart.
+- Fix bug which could cause a queue cleanup to block indefinitely and cause the
+  `vmq_in_order_delivery_SUITE` tests to fail.
+- Add a new metric (queue_initialized_from_storage) to better monitor queue
+  initialization process after a node restart.
+- Fix edge case where an extra queue process could be started when metadata
+  events arrive late. Now local queue processes are only started when triggered
+  via a new local MQTT session.
+- Reimplement dead queue repair mechanism.
+- Add feature to reauthorize existing client subscriptions by reapplying current `auth_on_subscribe`
+  and `auth_on_subscribe_m5` hooks. This feature is exposed as a developer API in `vernemq_dev`, via
+  the `vmq-admin session reauthorize` CLI command, and as a API for `vmq_diversity` Lua scripts. This
+  work was kindly sponsored by AppModule AG (http://www.appmodule.net).
+- Improve planned cluster leave queue migration speed significantly (#766).
+- Start metrics server before setting up queues to ensure queue metric counts
+  are correct when restarting VerneMQ.
+- Let Travis CI build the VerneMQ release packages.
+- Add new metric `system_process_count` which is a gauge representing the
+  current number of Erlang processes.
+- Add `queue_started_at` and `session_started_at` information to the `vmq-admin
+  session show` command. Times are POSIX time in milliseconds and local to the
+  node where the session or queue was started.
 
 ## VerneMQ 1.6.0
 

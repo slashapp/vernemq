@@ -61,6 +61,7 @@
          incr_mqtt_error_unsubscribe/0,
 
          incr_queue_setup/0,
+         incr_queue_initialized_from_storage/0,
          incr_queue_teardown/0,
          incr_queue_drop/0,
          incr_queue_msg_expired/1,
@@ -207,6 +208,9 @@ incr_mqtt_error_unsubscribe() ->
 
 incr_queue_setup() ->
     incr_item(queue_setup, 1).
+
+incr_queue_initialized_from_storage() ->
+    incr_item(queue_initialized_from_storage, 1).
 
 incr_queue_teardown() ->
     incr_item(queue_teardown, 1).
@@ -703,6 +707,7 @@ counter_entries_def() ->
      m(counter, [{mqtt_version,"5"}], ?MQTT5_UNSUBSCRIBE_RECEIVED, mqtt_unsubscribe_received, <<"The number of UNSUBSCRIBE packets received.">>),
 
      m(counter, [], queue_setup, queue_setup, <<"The number of times a MQTT queue process has been started.">>),
+     m(counter, [], queue_initialized_from_storage, queue_initialized_from_storage, <<"The number of times a MQTT queue process has been initialized from offline storage.">>),
      m(counter, [], queue_teardown, queue_teardown, <<"The number of times a MQTT queue process has been terminated.">>),
      m(counter, [], queue_message_drop, queue_message_drop, <<"The number of messages dropped due to full queues.">>),
      m(counter, [], queue_message_expired, queue_message_expired, <<"The number of messages which expired before delivery.">>),
@@ -975,6 +980,7 @@ system_statistics() ->
     RunQueueLen = erlang:statistics(run_queue),
     {Total_Run_Time, _} = erlang:statistics(runtime),
     {Total_Wallclock_Time, _} = erlang:statistics(wall_clock),
+    ProcessCount = erlang:system_info(process_count),
     #{total := ErlangMemTotal,
       processes := ErlangMemProcesses,
       processes_used := ErlangMemProcessesUsed,
@@ -994,6 +1000,7 @@ system_statistics() ->
      {system_run_queue, RunQueueLen},
      {system_runtime, Total_Run_Time},
      {system_wallclock, Total_Wallclock_Time},
+     {system_process_count, ProcessCount},
 
      {vm_memory_total, ErlangMemTotal},
      {vm_memory_processes, ErlangMemProcesses},
@@ -1018,6 +1025,7 @@ system_stats_def() ->
      m(gauge, [], system_run_queue, system_run_queue, <<"The total number of processes and ports ready to run on all run-queues.">>),
      m(counter, [], system_runtime, system_runtime, <<"The sum of the runtime for all threads in the Erlang runtime system.">>),
      m(counter, [], system_wallclock, system_wallclock, <<"The number of milli-seconds passed since the node was started.">>),
+     m(gauge, [], system_process_count, system_process_count, <<"The number of Erlang processes.">>),
 
      m(gauge, [], vm_memory_total, vm_memory_total, <<"The total amount of memory allocated.">>),
      m(gauge, [], vm_memory_processes, vm_memory_processes, <<"The amount of memory allocated for processes.">>),
